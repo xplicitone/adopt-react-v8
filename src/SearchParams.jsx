@@ -1,44 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Results from "./Results";
 import useBreedList from "./useBreedList";
+import fetchSearch from "./fetchSearch";
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
 
 const SearchParams = () => {
-  const [location, setLocation] = useState("");
+  // Not doing anything with location and animal other than sending to API when requesting pet
+  // would be awesome if we let Browser take care of it and we can pull it out of browser
+  // whenever we had a submit event
+  // do as uncontrolled form. Still need to keep track of Animal, because animal feeds into breedList so that one has to be controlled
+
+  // 1) location and breed no longer being tracked by React (uncontrolled form part)
+  // Much more common way to do it unless you have a data dependency like we do with animal
+  // 2) only update when we want to search / hit submit
+  const [requestParams, setRequestParams] = useState({
+    location: "",
+    animal: "",
+    breed: "",
+  });
+  //const [location, setLocation] = useState("");
   const [animal, setAnimal] = useState("");
-  const [breed, setBreed] = useState("");
-  const [pets, setPets] = useState([]);
+  //const [breed, setBreed] = useState("");
   const [breeds] = useBreedList(animal);
 
-  useEffect(() => {
-    requestPets();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function requestPets() {
-    const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
-    );
-    const json = await res.json();
-
-    setPets(json.pets);
-  }
+  const results = useQuery(["search", requestParams], fetchSearch);
+  const pets = results?.data?.pets ?? [];
 
   return (
     <div className="search-params">
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          requestPets();
+
+          // browser api, not a react thing, feed it a form and it'll pull out all data in form for you into an obj
+          const formData = new FormData(e.target);
+
+          const obj = {
+            animal: formData.get("animal") ?? "",
+            breed: formData.get("breed") ?? "",
+            location: formData.get("location") ?? "",
+          };
+          setRequestParams(obj);
         }}
       >
         <label htmlFor="location">
           Location
-          <input
-            onChange={(e) => setLocation(e.target.value)}
-            id="location"
-            value={location}
-            placeholder="Location"
-          />
+          <input name="location" id="location" placeholder="Location" />
         </label>
         <label htmlFor="animal">
           Animal
@@ -47,7 +55,6 @@ const SearchParams = () => {
             value={animal}
             onChange={(e) => {
               setAnimal(e.target.value);
-              setBreed("");
             }}
           >
             <option />
@@ -58,12 +65,7 @@ const SearchParams = () => {
         </label>
         <label htmlFor="breed">
           Breed
-          <select
-            id="breed"
-            disabled={breeds.length === 0}
-            value={breed}
-            onChange={(e) => setBreed(e.target.value)}
-          >
+          <select name="breed" id="breed" disabled={breeds.length === 0}>
             <option />
             {breeds.map((breed) => (
               <option key={breed}>{breed}</option>
