@@ -1,5 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import ErrorBoundary from "./ErrorBoundary";
 import Carousel from "./Carousel";
 import fetchPet from "./fetchPet";
 
@@ -54,4 +55,21 @@ const Details = () => {
   );
 };
 
-export default Details;
+// If Details decides to have props in the future, it needs to passthru here. Spread operator OK because DetailsErrorBoundary doesnt care about props and meant to be seamless
+// dont care, go directly through DetailsErrorBoundary and pass it.. Not meant to have an opinion about the props.
+function DetailsErrorBoundary(props) {
+  return (
+    <ErrorBoundary
+      errorComponent={
+        <h2>
+          There was an error with this listing.
+          <Link to="/">Click here to go back to the home page</Link>
+        </h2>
+      }
+    >
+      <Details {...props} />
+    </ErrorBoundary>
+  );
+}
+
+export default DetailsErrorBoundary;
