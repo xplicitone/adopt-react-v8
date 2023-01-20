@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import ErrorBoundary from "./ErrorBoundary";
 import Carousel from "./Carousel";
 import fetchPet from "./fetchPet";
+import Modal from "./Modal";
 
 const Details = () => {
+  const [showModal, setShowModal] = useState(false);
   const { id } = useParams();
   // "details" is any arbitrary caching key, like what you provide to Redis or MemCacheD
   // basically says store it "here" in your cache.
@@ -40,6 +43,8 @@ const Details = () => {
   // Once here, pet is available and pet is loaded
   const pet = results.data.pets[0];
 
+  // rending Modal inside this React app, using setShowModal and pet.name, using all state inside of this to render somewhere else.
+  // much harder to do this without a portal - would pull all pet state out to app.jsx to be able to handle that otherwise which would be really hard.
   return (
     <div className="details">
       <Carousel images={pet.images} />
@@ -47,8 +52,19 @@ const Details = () => {
         <h1>{pet.name}</h1>
         <h2>
           {pet.animal} - {pet.breed} - {pet.city}, {pet.state}
-          <button>Adopt {pet.name}</button>
+          <button onClick={() => setShowModal(true)}>Adopt {pet.name}</button>
           <p>{pet.description}</p>
+          {showModal ? (
+            <Modal>
+              <div>
+                <h1>Would you like to adopt {pet.name}?</h1>
+                <div className="buttons">
+                  <button>Yes</button>
+                  <button onClick={() => setShowModal(false)}>No</button>
+                </div>
+              </div>
+            </Modal>
+          ) : null}
         </h2>
       </div>
     </div>
