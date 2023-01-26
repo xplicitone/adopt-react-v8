@@ -7,7 +7,7 @@ import fetchSearch from "./fetchSearch";
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
 
 const SearchParams = () => {
-  // Not doing anything with location and animal other than sending to API when requesting pet
+  // Not doing anything with location and breed other than sending to API when requesting pet
   // would be awesome if we let Browser take care of it and we can pull it out of browser
   // whenever we had a submit event
   // do as uncontrolled form. Still need to keep track of Animal, because animal feeds into breedList so that one has to be controlled
@@ -20,9 +20,8 @@ const SearchParams = () => {
     animal: "",
     breed: "",
   });
-  //const [location, setLocation] = useState("");
+
   const [animal, setAnimal] = useState("");
-  //const [breed, setBreed] = useState("");
   const [breeds] = useBreedList(animal);
   const [adoptedPet] = useContext(AdoptedPetContext);
 
@@ -30,8 +29,9 @@ const SearchParams = () => {
   const pets = results?.data?.pets ?? [];
 
   return (
-    <div className="search-params">
+    <div className="my-0 mx-auto w-11/12">
       <form
+        className="mb-10 flex flex-col items-center justify-center rounded-lg bg-gray-200 p-10 shadow-lg"
         onSubmit={(e) => {
           e.preventDefault();
 
@@ -53,12 +53,19 @@ const SearchParams = () => {
         ) : null}
         <label htmlFor="location">
           Location
-          <input name="location" id="location" placeholder="Location" />
+          <input
+            type="text"
+            name="location"
+            id="location"
+            className="search-input"
+            placeholder="Location"
+          />
         </label>
         <label htmlFor="animal">
           Animal
           <select
             id="animal"
+            className="search-input"
             value={animal}
             onChange={(e) => {
               setAnimal(e.target.value);
@@ -72,14 +79,21 @@ const SearchParams = () => {
         </label>
         <label htmlFor="breed">
           Breed
-          <select name="breed" id="breed" disabled={breeds.length === 0}>
+          <select
+            className="search-input grayed-out-disabled"
+            name="breed"
+            id="breed"
+            disabled={!breeds.length}
+          >
             <option />
             {breeds.map((breed) => (
               <option key={breed}>{breed}</option>
             ))}
           </select>
         </label>
-        <button>Submit</button>
+        <button className="rounded border-none bg-orange-500 px-6 py-2 text-white hover:opacity-50">
+          Submit
+        </button>
       </form>
       <Results pets={pets} />
     </div>
