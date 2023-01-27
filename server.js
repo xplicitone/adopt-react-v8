@@ -2,7 +2,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import renderApp from "./dist/server/serverApp.js";
+import renderApp from "./dist/server/ServerApp.js";
 
 // cant import jsx file directly has to be built
 // bc we are in esm modules with node, dirname doesnt exist
