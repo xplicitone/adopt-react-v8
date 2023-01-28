@@ -6,14 +6,20 @@ import ErrorBoundary from "./ErrorBoundary";
 import Carousel from "./Carousel";
 import fetchPet from "./fetchPet";
 import Modal from "./Modal";
+import { PetAPIResponse } from "./APIResponsesTypes";
 
 const Details = () => {
+  const { id } = useParams();
+
+  if (!id) {
+    throw new Error(
+      "why did you not giv me an id?! I wanted an id. I have no id."
+    );
+  }
+
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  // eslint-disable-next-line no-unused-vars
-  const [_, setAdoptedPet] = useContext(AdoptedPetContext);
-  const { id } = useParams();
   // "details" is any arbitrary caching key, like what you provide to Redis or MemCacheD
   // basically says store it "here" in your cache.
   // So it knows if you go and fetch exact same key again, it's not going to go fetch that
@@ -28,7 +34,10 @@ const Details = () => {
   if you think it's stale and you want to refetch) */
   // more readable than useEffect
 
-  const results = useQuery(["details", id], fetchPet);
+  const results = useQuery<PetAPIResponse>(["details", id], fetchPet);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setAdoptedPet] = useContext(AdoptedPetContext);
 
   // not being defense here (yet??)
   /*if (results.isError) {
@@ -46,7 +55,11 @@ const Details = () => {
   }
 
   // Once here, pet is available and pet is loaded
-  const pet = results.data.pets[0];
+  const pet = results?.data?.pets[0];
+
+  if (!pet) {
+    throw new Error("no pet lol");
+  }
 
   // rending Modal inside this React app, using setShowModal and pet.name, using all state inside of this to render somewhere else.
   // much harder to do this without a portal - would pull all pet state out to app.jsx to be able to handle that otherwise which would be really hard.
@@ -85,7 +98,7 @@ const Details = () => {
 
 // If Details decides to have props in the future, it needs to passthru here. Spread operator OK because DetailsErrorBoundary doesnt care about props and meant to be seamless
 // dont care, go directly through DetailsErrorBoundary and pass it.. Not meant to have an opinion about the props.
-function DetailsErrorBoundary(props) {
+function DetailsErrorBoundary() {
   return (
     <ErrorBoundary
       errorComponent={
@@ -95,7 +108,7 @@ function DetailsErrorBoundary(props) {
         </h2>
       }
     >
-      <Details {...props} />
+      <Details {} />
     </ErrorBoundary>
   );
 }
