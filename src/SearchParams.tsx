@@ -4,7 +4,8 @@ import AdoptedPetContext from "./AdoptedPetContext";
 import Results from "./Results";
 import useBreedList from "./useBreedList";
 import fetchSearch from "./fetchSearch";
-const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
+import { Animal } from "./APIResponsesTypes";
+const ANIMALS: Animal[] = ["bird", "cat", "dog", "rabbit", "reptile"];
 
 const SearchParams = () => {
   // Not doing anything with location and animal other than sending to API when requesting pet
@@ -17,11 +18,11 @@ const SearchParams = () => {
   // 2) only update when we want to search / hit submit
   const [requestParams, setRequestParams] = useState({
     location: "",
-    animal: "",
+    animal: "" as Animal,
     breed: "",
   });
   //const [location, setLocation] = useState("");
-  const [animal, setAnimal] = useState("");
+  const [animal, setAnimal] = useState("" as Animal);
   //const [breed, setBreed] = useState("");
   const [breeds] = useBreedList(animal);
   const [adoptedPet] = useContext(AdoptedPetContext);
@@ -36,12 +37,13 @@ const SearchParams = () => {
           e.preventDefault();
 
           // browser api, not a react thing, feed it a form and it'll pull out all data in form for you into an obj
-          const formData = new FormData(e.target);
+          const formData = new FormData(e.currentTarget);
 
           const obj = {
-            animal: formData.get("animal") ?? "",
-            breed: formData.get("breed") ?? "",
-            location: formData.get("location") ?? "",
+            animal:
+              (formData.get("animal")?.toString() as Animal) ?? ("" as Animal),
+            breed: formData.get("breed")?.toString() ?? "",
+            location: formData.get("location")?.toString() ?? "",
           };
           setRequestParams(obj);
         }}
@@ -61,8 +63,11 @@ const SearchParams = () => {
             id="animal"
             value={animal}
             onChange={(e) => {
-              setAnimal(e.target.value);
+              setAnimal(e.target.value as Animal);
             }}
+            // onBlur={(e) => {
+            //   setAnimal(e.target.value as Animal);
+            // }}
           >
             <option />
             {ANIMALS.map((animal) => (

@@ -3,7 +3,10 @@ import { Pet } from "./APIResponsesTypes";
 
 // if you have a cart, of items, put an empty array [] in createContext
 // ts make you have a default value
-const AdoptedPetContext = createContext<[Pet, (adoptedPet: Pet) => void]>([
+// had to change that AdoptedPet can be Pet or null. Most of the time null when they haven't adopted yet
+const AdoptedPetContext = createContext<
+  [Pet | null, (adoptedPet: Pet) => void]
+>([
   {
     id: 1337,
     name: "Fido",

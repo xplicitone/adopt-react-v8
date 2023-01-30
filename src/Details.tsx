@@ -6,7 +6,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import Carousel from "./Carousel";
 import fetchPet from "./fetchPet";
 import Modal from "./Modal";
-import { PetAPIResponse } from "./APIResponsesTypes";
 
 const Details = () => {
   const { id } = useParams();
@@ -34,7 +33,7 @@ const Details = () => {
   if you think it's stale and you want to refetch) */
   // more readable than useEffect
 
-  const results = useQuery<PetAPIResponse>(["details", id], fetchPet);
+  const results = useQuery(["details", id], fetchPet);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setAdoptedPet] = useContext(AdoptedPetContext);
@@ -108,7 +107,7 @@ function DetailsErrorBoundary() {
         </h2>
       }
     >
-      <Details {} />
+      <Details />
     </ErrorBoundary>
   );
 }

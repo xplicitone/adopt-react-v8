@@ -1,6 +1,9 @@
-import { Component } from "react";
+import { Component, ErrorInfo, ReactElement } from "react";
 
-class ErrorBoundary extends Component {
+class ErrorBoundary extends Component<{
+  children: ReactElement;
+  errorComponent: ReactElement;
+}> {
   state = { hasError: false };
   static getDerivedStateFromError() {
     return { hasError: true };
@@ -8,7 +11,7 @@ class ErrorBoundary extends Component {
 
   // we have our initial state, we have getDerivedStates from prop, so now LifeCycle method here
   // the acutal error it caught, additional info that React will give you
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     // typically you want to send/log this to a TrackJS or Sentry.io or New Relic (some aggregation of error service)
     // "hey we're seeing errors here, ship it off to your error tracking software."
     console.error("ErrorBoundary component caught an error", error, info);
