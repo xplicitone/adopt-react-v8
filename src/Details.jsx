@@ -1,7 +1,8 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import AdoptedPetContext from "./AdoptedPetContext";
+import { useDispatch } from "react-redux";
+import { adopt } from "./adoptedPetSlice";
 import ErrorBoundary from "./ErrorBoundary";
 import Carousel from "./Carousel";
 import fetchPet from "./fetchPet";
@@ -11,8 +12,6 @@ const Details = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  // eslint-disable-next-line no-unused-vars
-  const [_, setAdoptedPet] = useContext(AdoptedPetContext);
   const { id } = useParams();
   // "details" is any arbitrary caching key, like what you provide to Redis or MemCacheD
   // basically says store it "here" in your cache.
@@ -29,6 +28,7 @@ const Details = () => {
   // more readable than useEffect
 
   const results = useQuery(["details", id], fetchPet);
+  const dispatch = useDispatch();
 
   // not being defense here (yet??)
   /*if (results.isError) {
@@ -66,7 +66,7 @@ const Details = () => {
                 <div className="buttons">
                   <button
                     onClick={() => {
-                      setAdoptedPet(pet);
+                      dispatch(adopt(pet));
                       navigate("/");
                     }}
                   >
