@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
+import { useSearchQuery } from "./petApiService";
 import Results from "./Results";
 import useBreedList from "./useBreedList";
-import fetchSearch from "./fetchSearch";
-import { all } from "./SearchParamsSlice";
+import { all } from "./searchParamsSlice";
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
 
 const SearchParams = () => {
@@ -14,8 +13,8 @@ const SearchParams = () => {
   const searchParams = useSelector((state) => state.searchParams.value);
   const dispatch = useDispatch();
 
-  const results = useQuery(["search", searchParams], fetchSearch);
-  const pets = results?.data?.pets ?? [];
+  let { data: pets } = useSearchQuery(searchParams);
+  pets = pets ?? [];
 
   return (
     <div className="search-params">
@@ -43,27 +42,36 @@ const SearchParams = () => {
           Location
           <input name="location" id="location" placeholder="Location" />
         </label>
+
         <label htmlFor="animal">
           Animal
           <select
             id="animal"
+            name="animal"
             value={animal}
             onChange={(e) => {
+              setAnimal(e.target.value);
+            }}
+            onBlur={(e) => {
               setAnimal(e.target.value);
             }}
           >
             <option />
             {ANIMALS.map((animal) => (
-              <option key={animal}>{animal}</option>
+              <option key={animal} value={animal}>
+                {animal}
+              </option>
             ))}
           </select>
         </label>
         <label htmlFor="breed">
           Breed
-          <select name="breed" id="breed" disabled={breeds.length === 0}>
+          <select id="breed" name="breed" disabled={!breeds.length}>
             <option />
             {breeds.map((breed) => (
-              <option key={breed}>{breed}</option>
+              <option key={breed} value={breed}>
+                {breed}
+              </option>
             ))}
           </select>
         </label>
