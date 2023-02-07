@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { render } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import useBreedList from "../useBreedList";
 
@@ -13,29 +13,53 @@ const queryClient = new QueryClient({
   },
 });
 
-function getBreedList(animal) {
-  // how to test hooks (useBreedList) outside a [react] component? You cannot.
-  // make a react component just to test
-  let list;
-
-  // valid react component, all we gotta do is then render it...
-  function TestComponent() {
-    list = useBreedList(animal);
-    return null;
-  }
-
-  render(
-    <QueryClientProvider client={queryClient}>
-      <TestComponent />
-    </QueryClientProvider>
-  );
-
-  // cheating lol. Go thru lifecycle, call useBreedList, save it in the let, so just have to return it
-  return list;
-}
-
+// will give you result and result = whatever you expected back from the hook
+// testing empty array
 test("gives an empty list with no animal provided", async () => {
-  const [breedList, status] = getBreedList();
+  const { result } = renderHook(() => useBreedList(""), {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  });
+
+  const [breedList, status] = result.current;
   expect(breedList).toHaveLength(0);
   expect(status).toBe("loading");
+});
+
+test("gives back breeds when given an animal", async () => {
+  const breeds = [
+    "Havanese",
+    "Bichon Frise",
+    "Poodle",
+    "Maltese",
+    "Golden Retriever",
+    "Labrador",
+    "Husky",
+  ];
+
+  // next time fetch is called, respond with "blah"
+  // can be more speciific like they must call this particular URL
+
+  /*gives back a string not object, which fetch then decodes for us */
+  fetch.mockResponseOnce(
+    // the next one just blindly spit this back at them
+    JSON.stringify({
+      animal: "dog",
+      breeds,
+    })
+  );
+
+  const { result } = renderHook(() => useBreedList("dog"), {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  });
+
+  // fetch is async, so you have to "WAIT FOR" it...
+  await waitFor(() => expect(result.current[1]).toBe("success"));
+
+  const [breedList] = result.current;
+
+  expect(breedList).toEqual(breeds);
 });
